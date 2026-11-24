@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Inter-House Quiz Contest 2083</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Mukta:wght@400;600&family=Anton&display=swap" rel="stylesheet">
+<style>
+:root{--gold:#f5c542;--amber:#ffb300;--green:#1faa59;--red:#d63a3a;--ink:#f4f0ff;--panel:#1a1270;--deep:#0a0530;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(ellipse at 50% 30%,#2a1a8c 0%,#10093f 55%,#05021c 100%);color:var(--ink);font-family:Mukta,system-ui,sans-serif;font-size:18px;overflow-x:hidden}
+[hidden]{display:none!important}
+h1,h2,.cin{font-family:Cinzel,Georgia,serif;letter-spacing:.02em}
+button{font:inherit;cursor:pointer;color:inherit}
+button:focus-visible,input:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.scr{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;text-align:center;gap:18px}
+.big{font-size:clamp(34px,7vw,76px);margin:0;color:var(--gold);line-height:1.05;text-shadow:0 0 30px #f5c54266}
+.btn{background:linear-gradient(#ffd75e,#e0a416);color:#2a1a00;border:0;padding:14px 38px;font-weight:600;font-size:20px;clip-path:polygon(8% 0,92% 0,100% 50%,92% 100%,8% 100%,0 50%);font-family:Cinzel,serif}
+.btn:hover{filter:brightness(1.1)}
+.btn:disabled{filter:grayscale(1) brightness(.6);cursor:not-allowed}
+.hex{position:relative;clip-path:polygon(5% 0,95% 0,100% 50%,95% 100%,5% 100%,0 50%);background:var(--gold);--fill:#150d5c;border:0;width:100%;padding:0;text-align:left}
+.hex::before{content:"";position:absolute;inset:3px;clip-path:polygon(5% 0,95% 0,100% 50%,95% 100%,5% 100%,0 50%);background:var(--fill)}
+.hex>span{position:relative;display:block;padding:16px 8%}
+.opt:hover:not(:disabled){--fill:#2b1d9a}
+.opt.sel{--fill:var(--amber);color:#1b1000}
+.opt.ok{--fill:var(--green);color:#fff}
+.opt.bad{--fill:var(--red);color:#fff}
+.opt.gone{opacity:.35}
+.opt b{color:var(--gold);margin-right:10px}
+.opt.sel b,.opt.ok b,.opt.bad b{color:inherit}
+#game{flex-direction:row;align-items:stretch;justify-content:center;padding:16px;gap:20px;text-align:left}
+.main{flex:1;max-width:1180px;display:flex;flex-direction:column;justify-content:center;gap:16px}
+.hud{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.hud .cin{color:var(--gold);font-size:22px}
+.q{font-size:clamp(20px,2.6vw,30px);min-height:120px;display:flex}
+.q>span{display:flex;align-items:center;width:100%;padding:22px 9%}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.opt>span{font-size:clamp(17px,2vw,24px)}
+.row{display:flex;gap:14px;align-items:center;justify-content:space-between;flex-wrap:wrap;min-height:56px}
+.adv{background:var(--panel);border:2px solid var(--gold);border-radius:40px;padding:10px 22px;font-weight:600}
+.adv:disabled{opacity:.45;cursor:not-allowed}
+.adv i{font-style:normal;background:var(--gold);color:#2a1a00;border-radius:20px;padding:1px 10px;margin-left:8px}
+aside{width:220px;display:flex;align-items:center}
+ol{list-style:none;margin:0;padding:0;display:flex;flex-direction:column-reverse;gap:4px;width:100%}
+ol li{display:flex;justify-content:space-between;padding:5px 12px;border-radius:6px;font-size:16px;color:#cfc8ff;background:#150d5c99}
+ol li.safe{color:var(--gold);font-weight:600}
+ol li.now{background:var(--gold);color:#2a1a00;font-weight:600}
+ol li.done{opacity:.5}
+.snd{position:fixed;top:calc(10px + env(safe-area-inset-top,0px));right:12px;z-index:6;display:flex;flex-direction:column;align-items:flex-end;gap:8px;font-size:16px}
+.snd button{background:#0a053099;border:1px solid var(--gold);border-radius:20px;padding:4px 16px}
+#sndPanel{background:#0a0530ee;border:2px solid var(--gold);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:12px;min-width:230px}
+#sndPanel label{display:flex;flex-direction:column;gap:4px;text-align:left}
+#sndPanel input{width:100%;accent-color:var(--gold)}
+.rules{max-width:640px;text-align:left;font-size:22px;line-height:1.5;padding-left:28px}
+.rules li{margin:8px 0}
+.modal{position:fixed;inset:0;background:#000b;display:flex;align-items:center;justify-content:center;z-index:9;padding:20px}
+.card{background:var(--deep);border:3px solid var(--gold);border-radius:18px;padding:26px;max-width:560px;width:100%;text-align:center;display:flex;flex-direction:column;gap:16px}
+.houses{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.house{border:0;border-radius:12px;padding:16px;font-weight:600;font-size:22px;color:#fff;text-shadow:0 1px 3px #0008}
+.house:disabled{opacity:.3;cursor:not-allowed}
+.time{font-size:72px;color:var(--gold)}
+details{max-width:640px;width:100%;background:#0a053099;border-radius:12px;padding:10px 16px;text-align:left;font-size:16px}
+summary{cursor:pointer;font-weight:600}
+.ar{display:grid;grid-template-columns:110px 1fr 70px 70px;gap:8px;align-items:center;margin-top:8px}
+.ar input[type=number]{width:100%;padding:4px;background:#150d5c;color:var(--ink);border:1px solid #5b4fd0;border-radius:6px}
+.ar input[type=file]{width:100%;min-width:0;font-size:14px}
+.home{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:14px;z-index:6;width:56px;height:52px;display:grid;place-items:center;background:#060a2c;border:3px solid var(--gold);border-radius:12px;box-shadow:0 0 14px #f5c54288}
+.modes{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(14px,3vw,40px);width:100%;max-width:1000px}
+.menu{position:relative;overflow:hidden;justify-content:flex-start;padding:0;background:radial-gradient(ellipse at 50% 35%,#1d3cc4 0%,#0b1466 45%,#030620 100%)}
+.mwrap{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;gap:clamp(8px,2vh,22px);width:100%;max-width:1100px;padding:calc(14px + env(safe-area-inset-top,0px)) 20px 28px}
+.plate{position:relative;padding:10px 56px;clip-path:polygon(4% 0,96% 0,100% 50%,96% 100%,4% 100%,0 50%);background:linear-gradient(90deg,#c98a12,#ffe08a,#c98a12)}
+.plate::before{content:"";position:absolute;inset:3px;clip-path:inherit;background:linear-gradient(#0c1250,#050830)}
+.plate>*{position:relative;margin:0}
+.plate h2{font-family:Anton,Impact,sans-serif;font-weight:400;font-size:clamp(22px,4.2vw,50px);letter-spacing:.03em;text-transform:uppercase;background:linear-gradient(#fff,#b9c4e8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.tag{font-style:italic;font-size:clamp(15px,2.3vw,28px);font-weight:600;padding:8px 48px}
+.tag b{color:var(--gold)}
+.emblem{position:relative;width:clamp(200px,min(34vw,40vh),420px);aspect-ratio:1;border-radius:50%;display:grid;place-items:center;background:radial-gradient(circle,#070a45 55%,#101c8a 72%);box-shadow:0 0 0 4px #ffd45a,0 0 0 9px #1a3fe0,0 0 60px 20px #ffb83b66,inset 0 0 40px #000;animation:glow 3.5s ease-in-out infinite}
+.rings{position:absolute;inset:7%;border-radius:50%;animation:spin 40s linear infinite}
+.rings::before,.rings::after{content:"";position:absolute;inset:0;border-radius:50%;border:2px solid #f5c542aa;transform:rotate(30deg) scaleY(.6)}
+.rings::after{transform:rotate(-30deg) scaleY(.6)}
+.etxt{position:relative;display:flex;flex-direction:column;align-items:center;line-height:.92;font-family:Anton,Impact,sans-serif;font-style:italic;transform:skewX(-6deg)}
+.the{font-size:clamp(24px,4.4vw,56px);color:#fff;text-shadow:0 3px 0 #1b2a8a}
+.quiz{font-size:clamp(60px,11vw,150px);background:linear-gradient(#fff,#8fa3d8 55%,#e9efff);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 4px 0 #1b2a8a)}
+.chal{font-size:clamp(28px,5.4vw,72px);background:linear-gradient(#fff3b0,#f5b72b 55%,#b8700a);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 3px 0 #5a3000)}
+.mcw{filter:drop-shadow(0 0 10px var(--c));animation:rise .7s both;transition:transform .2s,filter .2s}
+.mcw:hover{transform:translateY(-8px) scale(1.03);filter:drop-shadow(0 0 24px var(--c))}
+.mc{position:relative;display:flex;flex-direction:column;align-items:center;gap:4px;width:100%;padding:16px 12px 22px;border:0;background:var(--c);clip-path:polygon(6% 0,94% 0,100% 12%,100% 88%,94% 100%,6% 100%,0 88%,0 12%)}
+.mc::before{content:"";position:absolute;inset:3px;clip-path:inherit;background:linear-gradient(var(--a),var(--b))}
+.mc>*{position:relative}
+.ic svg{width:clamp(44px,6vw,72px);height:auto;filter:drop-shadow(0 0 8px var(--c))}
+.mn{font-family:Anton,Impact,sans-serif;font-style:italic;font-weight:400;font-size:clamp(24px,3.6vw,44px);text-transform:uppercase}
+.md{font-style:italic;font-size:clamp(14px,1.7vw,20px)}
+.beam{position:absolute;top:6%;width:110px;height:58%;z-index:1;background:radial-gradient(circle at 50% 0,#fff 0 7px,transparent 8px),linear-gradient(#7db8ffaa,#7db8ff00);clip-path:polygon(40% 0,60% 0,100% 100%,0 100%);transform-origin:50% 0;animation:sway 6s ease-in-out infinite alternate;pointer-events:none}
+.crowd{position:absolute;top:36%;width:24%;height:18%;z-index:1;opacity:.85;background:radial-gradient(circle at 50% 28%,#02031a 0 9px,transparent 10px),radial-gradient(ellipse at 50% 100%,#02031a 0 15px,transparent 16px);background-size:30px 36px}
+.crowd.l{left:0;-webkit-mask-image:linear-gradient(to right,#000,transparent);mask-image:linear-gradient(to right,#000,transparent)}
+.crowd.r{right:0;-webkit-mask-image:linear-gradient(to left,#000,transparent);mask-image:linear-gradient(to left,#000,transparent)}
+.floor{position:absolute;left:-15%;right:-15%;bottom:-30%;height:58%;border-radius:50%;z-index:1;background:radial-gradient(ellipse,#2342c9 0%,#0a1260 60%,#04072e 100%);box-shadow:0 0 0 4px #4d8dff,0 0 50px 8px #2f63ff}
+.bg{position:relative;overflow:hidden;background:radial-gradient(ellipse at 50% 20%,#2a3fd0 0%,#0e1470 45%,#04061f 100%)}
+.bg::before{content:"";position:absolute;left:-10%;right:-10%;bottom:-26%;height:46%;border-radius:50%;background:radial-gradient(ellipse,#1d3fc0,#08104f 65%,#04072e);box-shadow:0 0 0 4px #7a5cff,0 0 40px 6px #3a5bff}
+.bg>.main,.bg>aside{position:relative;z-index:2}
+.main .plate{align-self:center}
+.sv{background:linear-gradient(#fff,#a9b7e8);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gd{background:linear-gradient(#fff3b0,#f5b72b 60%,#b8700a);-webkit-background-clip:text;background-clip:text;color:transparent}
+.gh{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+.pills{justify-self:end;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.pill{position:relative;isolation:isolate;padding:6px 28px;font-weight:600;text-transform:uppercase;font-size:clamp(14px,1.7vw,22px);clip-path:polygon(8% 0,92% 0,100% 50%,92% 100%,8% 100%,0 50%);background:linear-gradient(#ffe08a,#c98a12)}
+.pill::before{content:"";position:absolute;inset:3px;z-index:-1;clip-path:inherit;background:linear-gradient(#0c1250,#050830)}
+.pill:empty{display:none}
+.pill b{color:var(--gold)}
+.badge{display:flex;flex-direction:column;align-items:center;padding:6px 52px;line-height:.95;font-family:Anton,Impact,sans-serif;font-style:italic}
+.t1{font-size:clamp(22px,3.4vw,40px)}
+.t2{font-size:clamp(28px,4.6vw,58px)}
+.mhead{display:flex;align-items:center;gap:14px}
+.mi svg{width:clamp(54px,8vw,100px);height:auto;filter:drop-shadow(0 0 10px #fff8)}
+.mcol{display:flex;flex-direction:column;align-items:center;gap:4px}
+.mt{font-family:Anton,Impact,sans-serif;font-size:clamp(34px,6vw,76px);line-height:1;text-transform:uppercase}
+.mt b{font-weight:400;display:inline-block;transform:skewX(-8deg)}
+.tag.sm{padding:4px 40px;font-size:clamp(14px,1.8vw,22px)}
+.timebar{display:flex;justify-content:center}
+.tm{display:flex;align-items:center;gap:16px;padding:6px 60px;font-family:Anton,Impact,sans-serif;font-size:clamp(30px,5vw,56px)}
+.ti svg{width:44px;height:44px;display:block}
+#bOpts{display:grid;grid-template-columns:1fr minmax(150px,26%) 1fr;gap:12px 16px;align-items:center}
+#bOpts .opt:nth-child(1){grid-area:1/1}
+#bOpts .opt:nth-child(2){grid-area:1/3}
+#bOpts .opt:nth-child(3){grid-area:2/1}
+#bOpts .opt:nth-child(4){grid-area:2/3}
+.bbtn{grid-area:1/2/3/3;position:relative;aspect-ratio:1.25;width:100%;max-width:260px;justify-self:center;margin-bottom:26px}
+.bbtn .base{position:absolute;left:0;right:0;bottom:0;height:42%;border-radius:50%;background:linear-gradient(#5a5a66,#101014);box-shadow:0 10px 24px #000}
+.bbtn .dome{position:absolute;left:12%;right:12%;top:0;bottom:20%;border-radius:50% 50% 14% 14%/75% 75% 14% 14%;background:radial-gradient(circle at 35% 28%,#ffb3b3,#e8262b 42%,#7d0a0f);box-shadow:0 0 30px #ff3b3b88;transition:transform .1s}
+.bbtn.open .dome{animation:pulse 1.2s ease-in-out infinite}
+.bbtn.hit .dome{transform:translateY(8px);box-shadow:0 0 60px #fff}
+.bcap{position:absolute;left:0;right:0;bottom:-30px;text-align:center;font-family:Anton,Impact,sans-serif;font-size:24px;color:var(--gold)}
+@keyframes pulse{50%{box-shadow:0 0 60px #ff5a5acc;transform:scale(1.04)}}
+@media(max-width:820px){#bOpts{grid-template-columns:1fr}#bOpts .opt,#bOpts .bbtn{grid-area:auto}.gh{grid-template-columns:1fr}.gh>span{display:none}.pills{justify-self:center;flex-direction:row}.mhead{justify-content:center}}
+@keyframes rise{from{opacity:0;transform:translateY(40px)}}
+@keyframes sway{from{transform:rotate(calc(var(--r)*-1))}to{transform:rotate(var(--r))}}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes glow{50%{box-shadow:0 0 0 4px #ffd45a,0 0 0 9px #1a3fe0,0 0 95px 30px #ffb83bbb,inset 0 0 40px #000}}
+.dead{opacity:.35}
+.house small{font-weight:400}
+#rapid .main,#buzzer .main{width:100%}
+@media(max-width:820px){aside{display:none}.opts{grid-template-columns:1fr}}
+@media(max-width:700px){.modes{grid-template-columns:1fr}.mwrap{padding-top:calc(56px + env(safe-area-inset-top,0px))}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.the{font-size:clamp(18px,3vw,38px);letter-spacing:.1em}
+.btn.sm{padding:8px 26px;font-size:16px}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,2vw,24px);width:100%;max-width:920px;align-self:center}
+.tiles.topics{grid-template-columns:1fr 1fr}
+.tile{position:relative;isolation:isolate;aspect-ratio:1.6;border:0;color:#fff;background:var(--gold);clip-path:polygon(10% 0,90% 0,100% 50%,90% 100%,10% 100%,0 50%);display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Anton,Impact,sans-serif;font-size:clamp(34px,6vw,72px);transition:transform .15s}
+.tile::before{content:"";position:absolute;inset:3px;z-index:-1;clip-path:inherit;background:linear-gradient(#2b1d9a,#0b0f55)}
+.tile:hover:not(:disabled){transform:scale(1.06)}
+.tile:disabled{opacity:.3;cursor:not-allowed}
+.topics .tile{aspect-ratio:auto;padding:18px 24px;font-size:clamp(30px,4vw,48px)}
+.tile span{font-family:Mukta,system-ui,sans-serif;font-size:clamp(16px,2vw,26px);font-weight:600}
+.sb{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;width:100%}
+.sb .house{padding:8px 6px;font-size:clamp(14px,1.8vw,22px);transition:transform .15s}
+.sb .on{outline:4px solid #fff;transform:translateY(-4px)}
+.sb .cin{display:block;font-size:1.5em}
+.pop{animation:pop .35s both}
+@keyframes pop{from{opacity:0;transform:scale(.85) translateY(10px)}}
+/* text clipping fixes: gradient text needs room for italic overhang and tall letters */
+.sv,.gd{display:inline-block;padding:.08em .16em}
+.plate h2{padding:.1em .2em}
+.badge{line-height:1.1}
+.badge span{padding:.06em .18em}
+.mt{line-height:1.2}
+.mt b{padding:0 .14em}
+.etxt{line-height:1.05}
+.etxt span{padding:.04em .16em}
+/* equal-size round cards */
+.modes{grid-auto-rows:1fr}
+.mcw{display:flex}
+.mcw>.mc{flex:1;justify-content:flex-start;padding:16px 18px 22px}
+.mn{font-size:clamp(22px,3.1vw,40px);text-align:center}
+.md{text-align:center}
+</style>
+</head>
+<body>
+<div class="snd"><button id="sndBtn" aria-expanded="false" aria-controls="sndPanel">Sound</button>
+  <div id="sndPanel" hidden>
+    <label>Music <input id="musV" type="range" min="0" max="1" step="0.05" value="0.5"></label>
+    <label>Sound effects <input id="sfxV" type="range" min="0" max="1" step="0.05" value="0.8"></label>
+    <button id="mute" aria-pressed="false">Mute all</button>
+  </div>
+</div>
+
+<button class="home" id="homeBtn" hidden aria-label="Home"><svg viewBox="0 0 24 24" width="30" height="30" fill="#fff"><path d="M12 3 2 12h3v8h5v-5h4v5h5v-8h3z"/></svg></button>
+
+<section id="title" class="scr menu">
+  <i class="beam" style="left:3%;--r:7deg"></i><i class="beam" style="left:13%;--r:5deg;animation-delay:-2s"></i><i class="beam" style="left:23%;--r:8deg;animation-delay:-4s"></i>
+  <i class="beam" style="right:23%;--r:7deg;animation-delay:-1s"></i><i class="beam" style="right:13%;--r:5deg;animation-delay:-3s"></i><i class="beam" style="right:3%;--r:8deg;animation-delay:-5s"></i>
+  <div class="crowd l"></div><div class="crowd r"></div><div class="floor"></div>
+  <div class="mwrap">
+    <div class="plate"><h2 id="schoolName"></h2></div>
+    <div class="emblem"><div class="rings"></div><div class="etxt"><span class="the">INTER-HOUSE</span><span class="quiz">QUIZ</span><span class="chal">CONTEST</span></div></div>
+    <div class="plate tag"><span>2083 &middot; Test Your Knowledge. Become a <b>Champion!</b></span></div>
+    <div class="modes" id="modes"></div>
+    <div class="row" style="justify-content:center;min-height:0"><button class="btn sm" id="sbBtn">Scoreboard</button><button class="btn sm" id="resetBtn">Reset scores</button></div>
+  </div>
+</section>
+
+<section id="rulesScr" class="scr bg" hidden>
+  <div class="main" style="align-items:center;text-align:center">
+    <div class="plate"><h2 class="sn"></h2></div>
+    <h1 class="big" id="rTitle" style="font-size:clamp(28px,5vw,54px)"></h1>
+    <ul class="rules" id="rulesList" style="list-style:decimal"></ul>
+    <button class="btn" id="goBtn">Start the Game</button>
+  </div>
+</section>
+
+<section id="board" class="scr bg" hidden>
+  <div class="main">
+    <div class="plate"><h2 class="sn"></h2></div>
+    <div class="gh"><span></span><div class="plate badge"><span class="t1 sv" id="bdRound"></span><span class="t2 gd" id="bdSub"></span></div><div class="pills"><span class="pill" id="bdTurn"></span></div></div>
+    <div class="tiles" id="tiles"></div>
+    <p id="bdHint" style="margin:0;text-align:center;opacity:.85;font-size:16px"></p>
+    <div class="sb"></div>
+  </div>
+</section>
+
+<section id="play" class="scr bg" hidden>
+  <div class="main">
+    <div class="plate"><h2 class="sn"></h2></div>
+    <div class="gh"><span></span><div class="plate badge"><span class="t1 sv" id="plRound"></span><span class="t2 gd" id="plSub"></span></div><div class="pills"><span class="pill" id="plTurn"></span><span class="pill" id="plInfo"></span></div></div>
+    <div class="hex q"><span id="plQ"></span></div>
+    <div class="opts" id="plOpts"></div>
+    <div class="plate tag" id="plAns" hidden><span id="plAnsT"></span></div>
+    <div class="row" id="plCtl" style="justify-content:center"></div>
+    <div class="timebar" id="plTimer" hidden><div class="plate tm"><b id="plTime"></b></div></div>
+    <div class="sb"></div>
+  </div>
+</section>
+
+<section id="end" class="scr bg" hidden>
+  <div class="main" style="align-items:center;text-align:center">
+    <div class="plate"><h2 class="sn"></h2></div>
+    <h1 class="big" id="endTitle"></h1>
+    <p class="cin" id="endText" style="font-size:clamp(20px,3vw,34px);margin:0"></p>
+    <div class="sb"></div>
+    <button class="btn" id="againBtn">Back to Menu</button>
+  </div>
+</section>
+
+<script>
+/* ===== EDIT THESE ===== */
+const SCHOOL = "Apple Seeds School";
+const HOUSES = [
+  {name:"Red House",color:"#d63a3a"},
+  {name:"Blue House",color:"#2f6fe0"},
+  {name:"Green House",color:"#1f9d55"},
+  {name:"Yellow House",color:"#d9a400"}
+];
+const R1 = {firstOption:4.6, nextOption:3.2, seconds:60, passSeconds:20, points:10, passPoints:5};
+const RAPID = {seconds:60, points:10};
+const BUZZ_POINTS = 10;
+const RULES = {
+  r1:[`The quiz master selects the house whose turn it is. That house picks a question number from 1 to ${8}.`,
+      `The options appear one by one. When all are shown, the timer starts: ${R1.seconds} seconds for ${R1.points} points.`,
+      `If a house passes or answers wrongly, the next house gets the question for ${R1.passPoints} points and ${R1.passSeconds} seconds.`],
+  rapid:["Each house chooses one of the 4 topics. A topic can be chosen only once.",
+      `Each house answers 5 questions in ${RAPID.seconds/60} minute. Every question carries ${RAPID.points} marks.`,
+      "There is no deduction for a wrong answer."],
+  buzz:["8 questions will be asked.",
+      "Press your house key (1 to 4), or tap your house, to buzz. The first house to buzz answers.",
+      `A correct answer carries ${BUZZ_POINTS} marks. There is no deduction for a wrong answer, and the question then closes.`]
+};
+/* Round 1: [question, [A, B, C, D], index of correct option] */
+const R1_QS = [
+ ["What type of energy is stored in food?",["Mechanical Energy","Chemical Energy","Kinetic Energy","Potential Energy"],1],
+ ["How many players from one team play on a basketball court?",["5","6","7","8"],0],
+ ["Which number system is used internally by computers?",["Decimal Number System","Quinary Number System","Binary Number System","Hindu-Arabic Number System"],2],
+ ["Who is the Vice-President of Nepal?",["Balendra Shah","Ravi Lamichhane","Sudan Gurung","Ram Sahaya Prasad Yadav"],3],
+ ["What name is given to an angle that is greater than 90° but less than 180°?",["Right angle","Obtuse angle","Straight angle","Reflex angle"],1],
+ ["Who built the famous Changu Narayan Temple of Kathmandu?",["King Haridatta Varma","Amshu Varma","King Laxmi Narsingha Malla","King Ranabahadur"],0],
+ ["पोखरीहरूको शहर, वा ‘लेक सिटी’ भनेर कुन शहरलाई चिनिन्छ?",["काठमाडौं","पोखरा","बुटवल","लुम्बिनी"],1],
+ ["कुनै काम भएको वा गरेको जनाउने शब्द के भनिन्छ?",["विशेषण","सर्वनाम","क्रिया","नाम"],2]
+];
+/* Round 2: [question, answer] has no options (quiz master judges); [question, [options], index] is multiple choice */
+const TOPICS = [
+ {n:"Science and Technology",q:[
+  ["Which plant tissue transports water and minerals upward?","Xylem"],
+  ["What is the name of the first artificial satellite launched into space?","Sputnik 1"],
+  ["What is the bouncing back of light called?","Reflection"],
+  ["Which atmospheric layer contains most of the ozone layer?","Stratosphere"],
+  ["What does a GPS receiver use to help calculate location?","Satellites"]]},
+ {n:"Games and Entertainment",q:[
+  ["Who won the 2026 FIFA Men’s World Cup?","Spain"],
+  ["What does LBW stand for in cricket?","Leg Before Wicket"],
+  ["Which Nepali film won nine awards at INFA Awards 2026?","Oon Ko Sweater"],
+  ["Which singer is famous for the song “Shape of You”?","Ed Sheeran"],
+  ["What is the distance of a marathon race?","42.195 kilometres"]]},
+ {n:"History and Geography",q:[
+  ["What was the ancient name of Kathmandu Valley?",["Mithila","Videha","Nepal Mandala","Kirat"],2],
+  ["Who was the first woman Chief Justice of Nepal, who became the first woman Prime Minister in 2025?",["Bidya Devi Bhandari","Sushila Karki","Sahana Pradhan","Onsari Gharti Magar"],1],
+  ["नेपालमा कतिवटा प्रदेश र स्थानीय तह रहेका छन्?",["६ प्रदेश, ७५३ स्थानीय तह","७ प्रदेश, ७४४ स्थानीय तह","७ प्रदेश, ७५३ स्थानीय तह","५ प्रदेश, ७४८ स्थानीय तह"],2],
+  ["नेपालको सबैभन्दा धेरै जिल्लासँग सीमा जोडिएको जिल्ला कुन हो?",["सिन्धुली","चितवन","धादिङ","मकवानपुर"],3],
+  ["नेपाल राष्ट्र बैंकको स्थापना कहिले भएको थियो?",["वि.सं. २००७ फागुन ७ गते","वि.सं. २०१३ वैशाख १४ गते","वि.सं. २०१८ असोज ३० गते","वि.सं. २०२२ जेठ १ गते"],1]]},
+ {n:"Current Affairs",q:[
+  ["Who is the current Finance Minister of Nepal?","Swarnim Wagle"],
+  ["Which cricket tournament is being played in Nepal in November 2026?","Nepal Premier League (NPL)"],
+  ["Which team defeated Chitwan Rhinos by five wickets on 2 November 2026?","Sudurpaschim Royals"],
+  ["Which political party does Prime Minister Balendra Shah belong to?","Rastriya Swatantra Party (RSP)"],
+  ["Who became Nepal’s Prime Minister after the March 2026 general election?","Balendra Shah"]]}
+];
+/* Round 3: [question, answer] */
+const BUZZ_QS = [
+ ["What is the process of breaking food into simpler substances called?","Digestion"],
+ ["What is the name of the instrument that records earthquake vibrations?","Seismograph"],
+ ["What is the scientific name for the voice box?","Larynx"],
+ ["Which sport is known as the game of kings?","Chess"],
+ ["Which animated character lives in a pineapple under the sea?","SpongeBob SquarePants"],
+ ["Which traditional Newari instrument is commonly played during festivals?","Dhime"],
+ ["What does COP stand for?","Conference of the Parties"],
+ ["If you have 6 apples and take away 4, how many do you have?","4 apples"]
+];
+/* ===== END EDIT ===== */
+
+const $=id=>document.getElementById(id);
+const SCREENS=["title","rulesScr","board","play","end"];
+function show(id){SCREENS.forEach(s=>$(s).hidden=s!==id);$("homeBtn").hidden=id==="title";drawSB()}
+
+/* ---------- Audio (synthesised, no files) ---------- */
+let AC,master,bus,sfxB,musB,mv=.5,sv=.8,muted=false,mode=null,beat=0,mt;
+function init(){
+  if(AC){if(AC.state==="suspended")AC.resume();return}
+  AC=new (window.AudioContext||window.webkitAudioContext)();
+  master=AC.createGain();
+  const comp=AC.createDynamicsCompressor();master.connect(comp);comp.connect(AC.destination);
+  const len=AC.sampleRate*2.4,ir=AC.createBuffer(2,len,AC.sampleRate);
+  for(let c=0;c<2;c++){const d=ir.getChannelData(c);for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/len,2.6)}
+  const rev=AC.createConvolver();rev.buffer=ir;
+  const rg=AC.createGain();rg.gain.value=.4;rev.connect(rg);rg.connect(master);
+  sfxB=AC.createGain();musB=AC.createGain();
+  [sfxB,musB].forEach(n=>{n.connect(master);n.connect(rev)});
+  bus=sfxB;
+  applyVol();
+  mt=setInterval(musicTick,300);
+}
+function applyVol(){
+  if(sfxB){sfxB.gain.value=muted?0:sv;musB.gain.value=muted?0:mv}
+}
+function tone(f,d,type="sine",v=.2,t0=0,f2,att=.02){
+  if(!AC)return;
+  const t=AC.currentTime+t0,g=AC.createGain(),fl=AC.createBiquadFilter();
+  fl.type="lowpass";
+  fl.frequency.value=(type==="sawtooth"||type==="square")?Math.min(Math.max(f*5,700),5000):12000;
+  g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(v*.6,t+att);
+  g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  fl.connect(g);g.connect(bus);
+  [-6,6].forEach(c=>{
+    const o=AC.createOscillator();o.type=type;o.detune.value=c;
+    o.frequency.setValueAtTime(f,t);
+    if(f2)o.frequency.exponentialRampToValueAtTime(f2,t+d);
+    o.connect(fl);o.start(t);o.stop(t+d+.05);
+  });
+}
+function noise(d,v,fc,t0=0){
+  if(!AC)return;
+  const t=AC.currentTime+t0,n=AC.createBufferSource(),b=AC.createBuffer(1,AC.sampleRate*d,AC.sampleRate),a=b.getChannelData(0);
+  for(let i=0;i<a.length;i++)a[i]=Math.random()*2-1;
+  n.buffer=b;const f=AC.createBiquadFilter();f.type="lowpass";f.frequency.value=fc;
+  const g=AC.createGain();g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+d);
+  n.connect(f);f.connect(g);g.connect(bus);n.start(t);
+}
+const thump=(v=.5,t0=0)=>tone(70,.35,"sine",v,t0,36);
+const hit=(v=.8,t0=0)=>{thump(v,t0);noise(.4,v*.35,2500,t0)};
+const SFX={
+  click:()=>{tone(700,.05,"square",.08);noise(.25,.06,3000)},
+  hover:()=>tone(1100,.08,"triangle",.06),
+  select:()=>{tone(520,.1,"triangle",.22);tone(780,.1,"triangle",.15,.07)},
+  reveal:()=>tone(300,.6,"sawtooth",.1,0,900),
+  lock:()=>{hit(1);tone(98,1.5,"sawtooth",.2,0,0,.05);tone(147,1.5,"sawtooth",.14,0,0,.05);tone(196,1.5,"sawtooth",.1,0,0,.05);tone(1320,.12,"square",.05,.02)},
+  correct:()=>{[392,523,659].forEach((f,i)=>{tone(f,.4,"sawtooth",.16,i*.13,0,.03);tone(f*2,.4,"triangle",.08,i*.13)});hit(.8,.45);[262,523,659,784,1047].forEach(f=>tone(f,2,"sawtooth",.14,.45,0,.05));tone(131,2,"sine",.35,.45);noise(1.8,.1,9000,.45);[1568,2093,2637,3136].forEach((f,i)=>tone(f,.6,"sine",.07,.6+i*.09))},
+  wrong:()=>{tone(233,.5,"sawtooth",.22,0,220,.05);tone(220,.5,"sawtooth",.22,.5,207,.05);tone(196,.5,"sawtooth",.22,1,184,.05);tone(165,1.8,"sawtooth",.24,1.5,105,.08);tone(55,2.2,"sine",.4,1.5,34);noise(1.6,.12,600,1.5)},
+  advice:()=>{for(let i=0;i<3;i++)tone(880,.15,"square",.12,i*.2)},
+  win:()=>{[392,523,659,784,659,784,1047].forEach((f,i)=>{tone(f,.45,"sawtooth",.16,i*.17,0,.03);tone(f*2,.45,"triangle",.08,i*.17)});hit(1,1.2);[262,523,659,784,1047,1319].forEach(f=>tone(f,3.5,"sawtooth",.14,1.2,0,.06));tone(131,3.5,"sine",.4,1.2);noise(3,.14,9000,1.2);[1568,2093,2637,3136,3951].forEach((f,i)=>tone(f,.8,"sine",.07,1.4+i*.12))}
+};
+function play(n){init();SFX[n]&&SFX[n]()}
+function musicTick(){bus=musB;try{musicTick2()}finally{bus=sfxB}}
+function musicTick2(){
+  if(!AC||muted||!mode)return;
+  const b=++beat;
+  if(mode==="title"){
+    const ch=[[220,262,330],[175,220,262],[196,247,294],[165,208,247]][(b>>3)%4];
+    if(b%8===1){ch.forEach(f=>tone(f,3,"sawtooth",.07,0,0,.6));tone(ch[0]/2,3,"sine",.18,0,0,.3)}
+    tone(ch[b%3]*2,.5,"triangle",.09);
+    if(b%32===1)noise(2.4,.08,7000);
+  }else if(mode==="suspense"){
+    if(b%4===0){thump(.55);thump(.35,.17)}
+    if(b%16===1)((b>>4)&1?[110,155,233,277]:[110,165,220,262]).forEach(f=>tone(f,5.2,"sawtooth",.07,0,0,2.2));
+    if(b%8===5){tone(440,.35,"triangle",.09);tone(415,.7,"triangle",.09,.3)}
+    if(b%2===1)tone([880,988,1047,988][(b>>1)%4],.14,"triangle",.05);
+  }else{
+    thump(.6);if(b%2===1)thump(.35,.12);
+    tone([220,262,247,262,220,294,262,330][b%8],.24,"sawtooth",.07);
+    if(b%8===1)tone(55,2.4,"sawtooth",.12,0,0,.3);
+    if(b%16===1){tone(110,4.8,"sawtooth",.1,0,880,3);noise(4.6,.06,3000)}
+  }
+}
+function setMode(m){mode=m;beat=0}
+$("mute").onclick=e=>{muted=!muted;e.target.textContent=muted?"Unmute all":"Mute all";e.target.setAttribute("aria-pressed",muted);applyVol()};
+$("musV").oninput=e=>{mv=+e.target.value;applyVol()};
+$("sfxV").oninput=e=>{sv=+e.target.value;init();applyVol();SFX.select()};
+$("sndBtn").onclick=e=>{const p=$("sndPanel");p.hidden=!p.hidden;e.target.setAttribute("aria-expanded",!p.hidden)};
+addEventListener("pointerdown",()=>init(),{once:true});
+
+
+
+/* ---------- State and helpers ---------- */
+let score=HOUSES.map(()=>0),round=0,gen=0,tick=0,turn=0,sbOn=-1,r1Done=[],topicsUsed=[],paused=false,r1House=0,r1Last=-1;
+let buzzN=0,buzzWho=-1,buzzOpen=false,buzzA="";
+const tm=(f,ms)=>{const g=gen;setTimeout(()=>g===gen&&f(),ms)};
+const halt=()=>{clearInterval(tick);gen++;buzzOpen=false};
+const sad=()=>tone(180,.45,"sawtooth",.22,0,100);
+function btn(t,fn,cls="btn"){const b=document.createElement("button");b.className=cls;b.textContent=t;b.onclick=()=>{play("click");fn()};return b}
+function optBtn(x,i,fn){const b=document.createElement("button");b.className="hex opt";b.innerHTML=`<span><b>${"ABCD"[i]}:</b>${x}</span>`;b.onclick=()=>fn(i,b);return b}
+function drawSB(){
+  document.querySelectorAll(".sb").forEach(el=>{
+    el.innerHTML="";
+    HOUSES.forEach((h,i)=>{
+      const b=document.createElement("button");b.className="house"+(i===sbOn?" on":"");b.style.background=h.color;
+      b.innerHTML=`${h.name}<span class="cin">${score[i]}</span>`;b.onclick=()=>pickHouse(i);el.appendChild(b);
+    });
+  });
+}
+function setup(a,b,c,d){
+  $("plRound").textContent=a;$("plSub").textContent=b;$("plTurn").textContent=c;$("plInfo").textContent=d;
+  $("plOpts").innerHTML="";$("plAns").hidden=true;$("plCtl").innerHTML="";$("plTimer").hidden=true;show("play");
+}
+function board(sub,turnTxt,on,cls){
+  $("bdRound").textContent="ROUND "+round;$("bdSub").textContent=sub;$("bdTurn").textContent=turnTxt;
+  sbOn=on;$("bdHint").textContent="";$("tiles").className=cls;$("tiles").innerHTML="";setMode("suspense");show("board");
+}
+function timer(sec,done){
+  clearInterval(tick);let t=sec;paused=false;$("plTime").style.opacity=1;$("plTime").textContent=t;$("plTimer").hidden=false;
+  tick=setInterval(()=>{
+    if(paused)return;
+    t--;$("plTime").textContent=t;
+    if(t<=5&&t>0)tone(900,.08,"square",.08);
+    if(t===10)setMode("tense");
+    if(t<=0){clearInterval(tick);done()}
+  },1000);
+}
+function roundEnd(name){
+  halt();setMode(null);sbOn=-1;
+  const m=Math.max(...score),w=HOUSES.filter((_,i)=>score[i]===m).map(h=>h.name).join(" & ");
+  $("endTitle").textContent=name;$("endText").textContent=m?`${w} ${w.includes("&")?"lead":"leads"} with ${m} points`:"No points scored yet";
+  show("end");if(name!=="Scoreboard")play("win");
+}
+
+/* ---------- Menu ---------- */
+const ROUNDS=[
+ {k:"r1",s:"General Round",d:"Round 1: pick a number, beat the clock",c:"#36c5ff",a:"#0b36c8",b:"#06104a",
+  i:`<svg viewBox='0 0 64 64' fill='none' stroke='#8fe6ff' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'><path d='M32 12v40M32 18c-6-6-18-2-18 8 0 3 1 5 3 7-3 3-3 9 2 11 3 2 7 1 9-1M32 18c6-6 18-2 18 8 0 3-1 5-3 7 3 3 3 9-2 11-3 2-7 1-9-1M20 26c3 0 5 2 5 5M44 26c-3 0-5 2-5 5'/></svg>`},
+ {k:"rapid",s:"Rapid Fire",d:"Round 2: choose a topic, answer fast",c:"#c46bff",a:"#7a24e6",b:"#2a0a6b",
+  i:`<svg viewBox='0 0 64 64' fill='none' stroke='#fff' stroke-width='3' stroke-linecap='round'><circle cx='32' cy='36' r='20'/><path d='M32 36V24M32 36l8 5M26 10h12M32 10v6M50 16l4-4M4 30h8M2 38h8'/></svg>`},
+ {k:"buzz",s:"Buzzer Round",d:"Round 3: be the quickest to buzz!",c:"#ffc447",a:"#d9921a",b:"#6a3c05",
+  i:`<svg viewBox='0 0 64 64'><path d='M14 44a18 18 0 0 1 36 0z' fill='#e8262b' stroke='#ff9a9a' stroke-width='2'/><rect x='8' y='44' width='48' height='10' rx='5' fill='#2a2a2a'/><path d='M32 8v8M16 14l5 6M48 14l-5 6M6 26l8 3M58 26l-8 3' stroke='#ffd34d' stroke-width='3' stroke-linecap='round'/></svg>`}
+];
+ROUNDS.forEach((r,j)=>{
+  const w=document.createElement("div");
+  w.className="mcw";w.style.cssText=`--c:${r.c};--a:${r.a};--b:${r.b};animation-delay:${.5+j*.15}s`;
+  w.innerHTML=`<button class="mc"><span class="ic">${r.i}</span><b class="mn">${r.s}</b><span class="md">${r.d}</span></button>`;
+  const b=w.firstChild;b.onmouseenter=()=>play("hover");
+  b.onclick=()=>{
+    play("click");round=j+1;
+    $("rTitle").textContent=`Round ${round}: ${r.s}`;
+    $("rulesList").innerHTML=RULES[r.k].map(x=>`<li>${x}</li>`).join("");
+    show("rulesScr");
+  };
+  $("modes").appendChild(w);
+});
+$("goBtn").onclick=()=>{play("click");halt();[0,r1Start,rapidStart,buzzStart][round]()};
+$("homeBtn").onclick=()=>{halt();sbOn=-1;play("click");show("title");setMode("title")};
+$("againBtn").onclick=$("homeBtn").onclick;
+$("sbBtn").onclick=()=>{play("click");roundEnd("Scoreboard")};
+let armed=0;
+$("resetBtn").onclick=e=>{
+  const b=e.target;
+  if(!armed){armed=1;b.textContent="Click again to confirm";setTimeout(()=>{armed=0;b.textContent="Reset scores"},3000);return}
+  score=score.map(()=>0);armed=0;b.textContent="Reset scores";play("click");drawSB();
+};
+
+/* ---------- Round 1: General Round ---------- */
+function r1Start(){turn=0;r1Last=-1;r1Done=[];r1Board()}
+function r1Board(){
+  halt();
+  if(r1Done.length===R1_QS.length)return roundEnd("Round 1 complete");
+  r1House=(r1Last+1)%HOUSES.length;
+  board("GENERAL ROUND",`${HOUSES[r1House].name}: pick a number`,r1House,"tiles");
+  $("bdHint").textContent="Tap a house below to change whose turn it is";
+  R1_QS.forEach((_,i)=>{
+    const b=document.createElement("button");b.className="tile";b.textContent=i+1;b.disabled=r1Done.includes(i);
+    b.onclick=()=>{play("select");r1Ask(i,r1House)};$("tiles").appendChild(b);
+  });
+}
+function r1Ask(i,first){
+  const [q,o,c]=R1_QS[i];let cur=first,tries=0;const bad=[];r1Last=first;
+  setup("ROUND 1","GENERAL ROUND","","");
+  $("plQ").textContent=`Q${i+1}. ${q}`;
+  const bs=o.map((x,k)=>$("plOpts").appendChild(optBtn(x,k,pick)));
+  bs.forEach(b=>b.style.visibility="hidden");
+  function begin(){
+    const p=tries>0;sbOn=cur;
+    $("plTurn").textContent=HOUSES[cur].name;
+    $("plInfo").textContent=`${p?R1.passPoints:R1.points} points${p?" (passed)":""}`;
+    bs.forEach(b=>b.disabled=true);$("plCtl").innerHTML="";drawSB();
+    if(p)go();else reveal();
+  }
+  function reveal(){
+    let k=0;setMode("suspense");$("plTimer").hidden=true;
+    const step=()=>{
+      if(k>=bs.length)return tm(go,600);
+      bs[k].style.visibility="visible";bs[k].classList.add("pop");tone(520+k*110,.2,"triangle",.22);k++;tm(step,R1.nextOption*1000);
+    };
+    tm(step,R1.firstOption*1000);
+  }
+  function go(){
+    bs.forEach((b,k)=>b.disabled=bad.includes(k));
+    const ps=btn("Pass",miss),pb=btn("Pause",()=>{
+      paused=!paused;pb.textContent=paused?"Resume":"Pause";ps.disabled=paused;
+      bs.forEach((b,k)=>b.disabled=paused||bad.includes(k));$("plTime").style.opacity=paused?.35:1;
+    },"btn sm");
+    $("plCtl").append(ps,pb);timer(tries>0?R1.passSeconds:R1.seconds,miss);
+  }
+  function miss(){
+    clearInterval(tick);tries++;
+    if(tries>=HOUSES.length)return end();
+    cur=(cur+1)%HOUSES.length;play("advice");begin();
+  }
+  function pick(k,b){
+    clearInterval(tick);bs.forEach(x=>x.disabled=true);
+    if(k===c){score[cur]+=tries>0?R1.passPoints:R1.points;b.classList.add("ok");play("correct");end()}
+    else{bad.push(k);b.classList.add("bad");sad();tm(miss,1000)}
+  }
+  function end(){
+    bs[c].classList.add("ok");bs.forEach(x=>x.disabled=true);$("plTimer").hidden=true;setMode(null);drawSB();
+    $("plCtl").innerHTML="";
+    $("plCtl").appendChild(btn(r1Done.length===R1_QS.length-1?"Finish round":"Continue",()=>{r1Done.push(i);turn++;r1Board()}));
+  }
+  begin();
+}
+
+/* ---------- Round 2: Rapid Fire ---------- */
+function rapidStart(){turn=0;topicsUsed=[];rapidBoard()}
+function rapidBoard(){
+  halt();
+  if(turn>=HOUSES.length)return roundEnd("Round 2 complete");
+  board("RAPID FIRE",`${HOUSES[turn].name}: choose a topic`,turn,"tiles topics");
+  TOPICS.forEach((t,i)=>{
+    const b=document.createElement("button");b.className="tile";b.innerHTML=`<b>${i+1}</b><span>${t.n}</span>`;
+    b.disabled=topicsUsed.includes(i);b.onclick=()=>{play("select");rapidReady(i)};$("tiles").appendChild(b);
+  });
+}
+function rapidReady(ti){
+  const h=turn,t=TOPICS[ti];
+  setup(t.n.toUpperCase(),"RAPID FIRE",HOUSES[h].name,`${t.q.length} questions`);
+  $("plQ").textContent=`${HOUSES[h].name}, you have ${RAPID.seconds} seconds for ${t.q.length} questions. Ready?`;
+  $("plCtl").appendChild(btn("Start",()=>rapidRun(ti)));
+}
+function rapidRun(ti){
+  const h=turn,qs=TOPICS[ti].q;let n=0,got=0,over=false;
+  const next=()=>{n++;n>=qs.length?endTurn():ask()};
+  const point=()=>{got++;score[h]+=RAPID.points;tone(660,.12,"triangle",.25);tone(990,.2,"triangle",.25,.1);drawSB()};
+  function endTurn(){
+    if(over)return;over=true;halt();setMode(null);topicsUsed.push(ti);
+    $("plOpts").innerHTML="";$("plAns").hidden=true;$("plTimer").hidden=true;
+    $("plQ").textContent=`${HOUSES[h].name} scored ${got*RAPID.points} points`;drawSB();
+    $("plCtl").innerHTML="";
+    $("plCtl").appendChild(btn(turn===HOUSES.length-1?"Finish round":"Next house",()=>{turn++;rapidBoard()}));
+    play(got?"correct":"advice");
+  }
+  function ask(){
+    const e=qs[n];
+    $("plQ").textContent=e[0];$("plInfo").textContent=`Question ${n+1} / ${qs.length}`;
+    $("plOpts").innerHTML="";$("plCtl").innerHTML="";$("plAns").hidden=true;
+    if(Array.isArray(e[1])){
+      const bs=e[1].map((x,k)=>$("plOpts").appendChild(optBtn(x,k,(k2,b)=>{
+        bs.forEach(y=>y.disabled=true);
+        if(k2===e[2]){b.classList.add("ok");point()}else{b.classList.add("bad");bs[e[2]].classList.add("ok");sad()}
+        tm(next,900);
+      })));
+    }else{
+      $("plCtl").append(
+        btn("Show answer",()=>{$("plAnsT").textContent=e[1];$("plAns").hidden=false}),
+        btn("✓ Correct",()=>{point();next()}),
+        btn("✗ Wrong",()=>{sad();next()}));
+    }
+  }
+  sbOn=h;drawSB();setMode("tense");timer(RAPID.seconds,endTurn);ask();
+}
+
+/* ---------- Round 3: Buzzer Round ---------- */
+function buzzStart(){buzzN=0;buzzQ()}
+function buzzQ(){
+  halt();
+  if(buzzN>=BUZZ_QS.length)return roundEnd("Round 3 complete");
+  const [q,a]=BUZZ_QS[buzzN++];buzzA=a;buzzWho=-1;buzzOpen=true;sbOn=-1;
+  setup("ROUND 3","BUZZER ROUND","Buzzers open",`Question ${buzzN} / ${BUZZ_QS.length}`);
+  buzzOpen=true;$("plQ").textContent=q;setMode("suspense");
+  const z=document.createElement("div");
+  z.id="bz";z.className="bbtn open";z.style.gridArea="auto/1/auto/3";
+  z.innerHTML="<i class='base'></i><i class='dome'></i><span class='bcap'></span>";
+  $("plOpts").appendChild(z);
+  const h=document.createElement("span");h.textContent="Press 1 to 4, or tap your house, to buzz";h.style.opacity=".85";
+  $("plCtl").append(h,btn("No buzz: show answer",()=>buzzEnd(null)));
+}
+function pickHouse(i){
+  if(round===3)return buzz(i);
+  if(round===1&&!$("board").hidden){
+    r1House=i;sbOn=i;play("select");
+    $("bdTurn").textContent=`${HOUSES[i].name}: pick a number`;drawSB();
+  }
+}
+function buzz(i){
+  if(round!==3||!buzzOpen||buzzWho>=0||$("play").hidden)return;
+  buzzWho=i;sbOn=i;tone(1000,.5,"square",.25);tone(1500,.4,"square",.15,.05);
+  $("plTurn").textContent=`${HOUSES[i].name} buzzed in!`;
+  $("bz").className="bbtn hit";$("bz").lastChild.textContent=HOUSES[i].name;drawSB();
+  $("plCtl").innerHTML="";
+  $("plCtl").append(
+    btn("Show answer",()=>{$("plAnsT").textContent=buzzA;$("plAns").hidden=false}),
+    btn("✓ Correct",()=>buzzEnd(true)),
+    btn("✗ Wrong",()=>buzzEnd(false)));
+}
+function buzzEnd(ok){
+  buzzOpen=false;
+  if(ok===true){score[buzzWho]+=BUZZ_POINTS;play("correct")}else if(ok===false)sad();
+  $("plAnsT").textContent=buzzA;$("plAns").hidden=false;$("bz").className="bbtn";drawSB();
+  $("plCtl").innerHTML="";
+  $("plCtl").appendChild(btn(buzzN>=BUZZ_QS.length?"Finish round":"Next question",buzzQ));
+}
+document.addEventListener("keydown",e=>{const k=+e.key;if(k>=1&&k<=HOUSES.length)buzz(k-1)});
+
+/* ---------- Start up ---------- */
+document.querySelectorAll(".sn,#schoolName").forEach(e=>e.textContent=SCHOOL);
+document.querySelectorAll(".bg").forEach(s=>[3,16,74,87].forEach((x,i)=>{
+  const b=document.createElement("i");b.className="beam";
+  b.style.cssText=`left:${x}%;--r:${5+i}deg;animation-delay:-${i*1.5}s`;s.prepend(b);
+}));
+drawSB();setMode("title");
+</script>
+</body>
+</html>
